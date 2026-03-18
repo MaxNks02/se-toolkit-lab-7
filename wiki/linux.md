@@ -11,7 +11,10 @@
 - [Permissions](#permissions)
   - [Owner](#owner)
   - [Mode](#mode)
-    - [Common modes](#common-modes)
+    - [Mode digit](#mode-digit)
+    - [Mode `700`](#mode-700)
+    - [Mode `600`](#mode-600)
+    - [Mode `644`](#mode-644)
 
 ## What is `Linux`
 
@@ -77,8 +80,48 @@ See:
 
 A mode is a three-digit number (e.g., `755`, `600`) that encodes the read, write, and execute [permissions](#permissions) for the [owner](#owner) user, the owner group, and everyone else respectively.
 
-#### Common modes
+#### Mode digit
 
-- `700` — owner can read, write, and execute; no access for group or others.
-- `600` — owner can read and write; no access for group or others.
-- `644` — owner can read and write; group and others can read.
+Each mode digit is a 3-bit binary number — one bit per permission:
+
+| Bit | Permission | Value |
+|-----|------------|-------|
+| `1` | read       | `4`   |
+| `1` | write      | `2`   |
+| `1` | execute    | `1`   |
+
+The digit is the sum of the values of the enabled bits.
+Examples:
+
+- `7` = `4+2+1` (all enabled)
+- `6` = `4+2` (read and write only)
+
+#### Mode `700`
+
+| Category | Digit | `r` | `w` | `x` |
+|----------|-------|-----|-----|-----|
+| Owner    | `7`   | ✓   | ✓   | ✓   |
+| Group    | `0`   |     |     |     |
+| Others   | `0`   |     |     |     |
+
+Owner can read, write, and execute; no access for group or others.
+
+#### Mode `600`
+
+| Category | Digit | `r` | `w` | `x` |
+|----------|-------|-----|-----|-----|
+| Owner    | `6`   | ✓   | ✓   |     |
+| Group    | `0`   |     |     |     |
+| Others   | `0`   |     |     |     |
+
+Owner can read and write; no access for group or others.
+
+#### Mode `644`
+
+| Category | Digit | `r` | `w` | `x` |
+|----------|-------|-----|-----|-----|
+| Owner    | `6`   | ✓   | ✓   |     |
+| Group    | `4`   | ✓   |     |     |
+| Others   | `4`   | ✓   |     |     |
+
+Owner can read and write; group and others can read.
