@@ -1,54 +1,43 @@
-import argparse
-import asyncio
-import sys
-import logging
-from aiogram import Bot, Dispatcher, types
-
-# Import your config and isolated core logic
-import config
-from handlers.core.commands import handle_command
-
-# Initialize the Telegram dispatcher
-dp = Dispatcher()
+from services.api import get_health, get_labs, get_scores
+from services.llm import process_natural_language
 
 
-@dp.message()
-async def universal_handler(message: types.Message):
+def handle_command(command_input: str) -> str:
     """
-    Catches messages, passes them to our isolated handler logic,
-    and sends the response back to the user in Telegram.
+    Processes both slash commands and natural language intent routing.
     """
-    # If the message has text, process it through our core logic
-    if message.text:
-        response = handle_command(message.text)
-        await message.answer(response)
+    text = command_input.strip()
+    if not text:
+        return "I didn't catch that. Try /help."
 
+    # Process standard slash commands
+    if text.startswith("/"):
+        parts = text.split()
+        command = parts[0].lower()
 
-async def main():
-    # 1. Handle CLI arguments for test mode
-    parser = argparse.ArgumentParser(description="LMS Telegram Bot")
-    parser.add_argument("--test", type=str, help="Run a command in test mode without Telegram")
-    args = parser.parse_args()
+        if command == "/start":
+            return "Welcome to the LMS Bot! I can help you check system health, browse labs, and view scores. You can also just ask me questions in plain English!"
+        elif command == "/help":
+            return (
+                "Here are the commands you can use:\n"
+                "/start - Welcome message\n"
+                "/help - Lists all available commands\n"
+                "/health - Check if the backend is up and running\n"
+                "/labs - List all available labs\n"
+                "/scores <lab_id> - Get pass rates for a specific lab (e.g., /scores lab-04)"
+            )
+        elif command == "/health":
+            return get_health()
+        elif command == "/labs":
+            return get_labs()
+        elif command == "/scores":
+            if len(parts) < 2:
+                return "Please specify a lab. Usage: /scores <lab_id> (e.g., /scores lab-04)"
+            return get_scores(parts[1])
+        else:
+            return f"Unknown command: {command}. Type /help to see what I can do."
 
-    # If --test flag is provided, run offline mode and exit
-    if args.test:
-        response = handle_command(args.test)
-        print(response)
-        sys.exit(0)
-
-    # 2. Run real Telegram bot if no --test flag
-    if not config.BOT_TOKEN:
-        print("Error: BOT_TOKEN is missing. Check your .env.bot.secret file at the project root.")
-        sys.exit(1)
-
-    # Enable logging to see bot activity in the terminal
-    logging.basicConfig(level=logging.INFO)
-
-    # Initialize bot and start polling
-    bot = Bot(token=config.BOT_TOKEN)
-    print("Starting Telegram bot polling...")
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+    # P1.1: Intent-Based Natural Language Routing
+    # If it is not a slash command, send it to the LLM to figure out what to do!
+    else:
+        return process_natural_language(text)
