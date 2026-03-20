@@ -1,0 +1,10 @@
+[project]
+name = "lms-bot"
+version = "0.1.0"
+description = "LMS Telegram Bot with AI Coding Agent"
+readme = "PLAN.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiogram>=3.4.0",
+    "python-dotenv>=1.0.1",
+]
