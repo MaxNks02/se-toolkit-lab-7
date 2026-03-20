@@ -1,50 +1,69 @@
+import sys
 from services.api import get_health, get_labs, get_scores
+from services.llm import process_natural_language
 
 
 def handle_command(command_input: str) -> str:
     """
-    Processes plain text commands for the --test mode and the Telegram bot.
-    Now integrated with real LMS backend data.
+    Processes both slash commands and natural language intent routing.
+    Includes stderr debug prints to trace execution in --test mode.
     """
-    # Split the input into parts (e.g., "/scores lab-04" -> ["/scores", "lab-04"])
-    parts = command_input.strip().split()
-    if not parts:
+    text = command_input.strip()
+
+    # 1. Debug: Confirm the function was called
+    print(f"DEBUG: handle_command received: '{text}'", file=sys.stderr)
+
+    if not text:
         return "I didn't catch that. Try /help."
 
-    command = parts[0].lower()
+    # 2. Process standard slash commands
+    if text.startswith("/"):
+        print(f"DEBUG: Detected slash command: {text}", file=sys.stderr)
+        parts = text.split()
+        command = parts[0].lower()
 
-    # P0.3: /start — welcome message
-    if command == "/start":
-        return "Welcome to the LMS Bot! I can help you check system health, browse labs, and view scores."
+        if command == "/start":
+            return (
+                "Welcome to the LMS Bot! I can help you check system health, browse labs, and view scores. "
+                "You can also just ask me questions in plain English!"
+            )
+        elif command == "/help":
+            return (
+                "Here are the commands you can use:\n"
+                "/start - Welcome message\n"
+                "/help - Lists all available commands\n"
+                "/health - Check if the backend is up and running\n"
+                "/labs - List all available labs\n"
+                "/scores <lab_id> - Get pass rates for a specific lab (e.g., /scores lab-04)"
+            )
+        elif command == "/health":
+            return get_health()
+        elif command == "/labs":
+            return get_labs()
+        elif command == "/scores":
+            if len(parts) < 2:
+                return "Please specify a lab. Usage: /scores <lab_id> (e.g., /scores lab-04)"
+            return get_scores(parts[1])
+        else:
+            return f"Unknown command: {command}. Type /help to see what I can do."
 
-    # P0.4: /help — lists all available commands
-    elif command == "/help":
-        return (
-            "Here are the commands you can use:\n"
-            "/start - Welcome message\n"
-            "/help - Lists all available commands\n"
-            "/health - Check if the backend is up and running\n"
-            "/labs - List all available labs\n"
-            "/scores <lab_id> - Get pass rates for a specific lab (e.g., /scores lab-04)"
-        )
-
-    # P0.5: /health — calls backend, reports status
-    elif command == "/health":
-        return get_health()
-
-    # P0.6: /labs — lists available labs
-    elif command == "/labs":
-        return get_labs()
-
-    # P0.7: /scores <lab> — per-task pass rates
-    elif command == "/scores":
-        # Edge case handling: ensure the user actually provided a lab ID
-        if len(parts) < 2:
-            return "Please specify a lab. Usage: /scores <lab_id> (e.g., /scores lab-04)"
-
-        lab_id = parts[1]
-        return get_scores(lab_id)
-
-    # Handle unknown commands gracefully
+    # 3. P1.1: Intent-Based Natural Language Routing
+    # If it is not a slash command, send it to the LLM to figure out what to do!
     else:
-        return f"Unknown command: {command}. Type /help to see what I can do."
+        print(f"DEBUG: Routing plain text to LLM: '{text}'", file=sys.stderr)
+        try:
+            # This calls the loop in services/llm.py
+            result = process_natural_language(text)
+
+            # 4. Debug: Confirm if the LLM returned anything
+            if not result:
+                print("DEBUG: WARNING - LLM returned an empty string!", file=sys.stderr)
+                return "The AI generated an empty response. Please try again."
+
+            print(f"DEBUG: LLM successfully returned {len(result)} chars.", file=sys.stderr)
+            return result
+
+        except Exception as e:
+            # This captures any unexpected crashes in the LLM service
+            print(f"DEBUG: CRITICAL ERROR in natural language routing: {e}", file=sys.stderr)
+            return f"Sorry, I ran into an error processing your request: {str(e)}"
