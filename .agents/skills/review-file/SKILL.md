@@ -1,6 +1,6 @@
 ---
 name: review-file
-description: "Review a file for convention violations. Supports lab/tasks/ files (conceptual + convention review), wiki/ files, contributing/conventions/ files, AGENTS.md, instructors/lab-plan.md (lab plan review), and instructors/meetings/ report.md files (cross-checked against the transcript and files discussed). Writes the review report to instructors/file-reviews/ (or report-review.md alongside the source for meeting reports)."
+description: "Review a file for convention violations. Supports lab/tasks/ files (conceptual + convention review), wiki/ files, contributing/conventions/ files, AGENTS.md, instructors/lab-PLAN.md (lab plan review), and instructors/meetings/ report.md files (cross-checked against the transcript and files discussed). Writes the review report to instructors/file-reviews/ (or report-review.md alongside the source for meeting reports)."
 argument-hint: "<path>"
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: ideate-lab
-description: Ideate a new lab for a given topic. Use when you want to draft a lab plan with learning outcomes aligned to Bloom's taxonomy, a lab story, three required tasks, and one optional task. Writes the result to instructors/lab-plan.md.
+description: Ideate a new lab for a given topic. Use when you want to draft a lab plan with learning outcomes aligned to Bloom's taxonomy, a lab story, three required tasks, and one optional task. Writes the result to instructors/lab-PLAN.md.
 argument-hint: "<topic>"
 ---
 
