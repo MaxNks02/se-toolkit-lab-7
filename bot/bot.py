@@ -1,43 +1,52 @@
-from services.api import get_health, get_labs, get_scores
-from services.llm import process_natural_language
+import argparse
+import asyncio
+import sys
+import logging
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+import config
+from handlers.core.commands import handle_command
 
-def handle_command(command_input: str) -> str:
-    """
-    Processes both slash commands and natural language intent routing.
-    """
-    text = command_input.strip()
-    if not text:
-        return "I didn't catch that. Try /help."
+dp = Dispatcher()
 
-    # Process standard slash commands
-    if text.startswith("/"):
-        parts = text.split()
-        command = parts[0].lower()
+# P1.3: Inline keyboard buttons setup
+def get_start_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📚 Labs", callback_data="ask_labs")],
+        [InlineKeyboardButton(text="🏥 Health", callback_data="ask_health")]
+    ])
 
-        if command == "/start":
-            return "Welcome to the LMS Bot! I can help you check system health, browse labs, and view scores. You can also just ask me questions in plain English!"
-        elif command == "/help":
-            return (
-                "Here are the commands you can use:\n"
-                "/start - Welcome message\n"
-                "/help - Lists all available commands\n"
-                "/health - Check if the backend is up and running\n"
-                "/labs - List all available labs\n"
-                "/scores <lab_id> - Get pass rates for a specific lab (e.g., /scores lab-04)"
-            )
-        elif command == "/health":
-            return get_health()
-        elif command == "/labs":
-            return get_labs()
-        elif command == "/scores":
-            if len(parts) < 2:
-                return "Please specify a lab. Usage: /scores <lab_id> (e.g., /scores lab-04)"
-            return get_scores(parts[1])
+@dp.message()
+async def universal_handler(message: types.Message):
+    if message.text:
+        response = handle_command(message.text)
+        if message.text.strip().lower().startswith("/start"):
+            await message.answer(response, reply_markup=get_start_keyboard())
         else:
-            return f"Unknown command: {command}. Type /help to see what I can do."
+            await message.answer(response)
 
-    # P1.1: Intent-Based Natural Language Routing
-    # If it is not a slash command, send it to the LLM to figure out what to do!
-    else:
-        return process_natural_language(text)
+@dp.callback_query(F.data.startswith("ask_"))
+async def handle_callback(callback: types.CallbackQuery):
+    if callback.data == "ask_labs":
+        response = handle_command("what labs are available")
+    elif callback.data == "ask_health":
+        response = handle_command("/health")
+    await callback.message.answer(response)
+    await callback.answer()
+
+async def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--test", type=str)
+    args = parser.parse_args()
+
+    if args.test:
+        response = handle_command(args.test)
+        print(response)
+        sys.exit(0)
+
+    bot = Bot(token=config.BOT_TOKEN)
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
