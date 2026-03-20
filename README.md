@@ -91,3 +91,13 @@ By the end of this lab, you should be able to say:
 2. [Backend Integration](./lab/tasks/required/task-2.md) — P0: slash commands + real data
 3. [Intent-Based Natural Language Routing](./lab/tasks/required/task-3.md) — P1: LLM tool use
 4. [Containerize and Document](./lab/tasks/required/task-4.md) — P3: containerize + deploy
+
+## Deploy
+
+### Environment Setup
+Ensure `.env.docker.secret` contains the necessary `BOT_TOKEN` and `LLM_API_KEY`.
+
+### Deployment Commands
+To deploy the entire stack, including the bot:
+```bash
+docker compose --env-file .env.docker.secret up --build -d
