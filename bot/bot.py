@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher, types
 
 # Import your config and isolated core logic
 import config
-from handlers.commands import handle_command
+from handlers.core.commands import handle_command
 
 # Initialize the Telegram dispatcher
 dp = Dispatcher()
