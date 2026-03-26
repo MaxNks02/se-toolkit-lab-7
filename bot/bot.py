@@ -47,6 +47,6 @@ async def main():
 
     bot = Bot(token=config.BOT_TOKEN)
     await dp.start_polling(bot)
-
+# main
 if __name__ == "__main__":
     asyncio.run(main())
