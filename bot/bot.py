@@ -35,6 +35,8 @@ async def handle_callback(callback: types.CallbackQuery):
     await callback.message.answer(response)
     await callback.answer()
 
+# P1.3: Inline keyboard buttons setup
+# P1.3: Inline keyboard buttons setup
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--test", type=str)
