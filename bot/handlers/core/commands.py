@@ -26,7 +26,7 @@ def handle_command(command_input: str) -> str:
         else:
             return f"Unknown command: {command}"
     
-    # P1.1: Natural language intent routing
+    
     else:
         print("DEBUG: Forwarding to LLM service...", file=sys.stderr)
         return process_natural_language(text)
