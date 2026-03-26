@@ -17,6 +17,8 @@ LLM_API_KEY = os.getenv("LLM_API_KEY")
 LLM_API_BASE_URL = os.getenv("LLM_API_BASE_URL")
 LLM_API_MODEL = os.getenv("LLM_API_MODEL")
 
+
+
 # Quick validation to ensure it loaded correctly when starting
 if not BOT_TOKEN:
     print(f"Warning: BOT_TOKEN not found. Make sure {ENV_PATH} exists.")
