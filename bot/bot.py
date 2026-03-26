@@ -26,6 +26,7 @@ async def universal_handler(message: types.Message):
         else:
             await message.answer(response)
 
+# P1.3: Inline keyboard buttons setup
 @dp.callback_query(F.data.startswith("ask_"))
 async def handle_callback(callback: types.CallbackQuery):
     if callback.data == "ask_labs":
